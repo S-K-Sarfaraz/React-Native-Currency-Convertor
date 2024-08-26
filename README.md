@@ -1,80 +1,157 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Currency Convertor App
 
-# Getting Started
+- Making The Interface by the name of 'Currency' for the data coming to be converted
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
-
-## Step 1: Start the Metro Server
-
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
-
-To start Metro, run the following command from the _root_ of your React Native project:
-
-```bash
-# using npm
-npm start
-
-# OR using Yarn
-yarn start
+```
+interface Currency {
+    name: string;
+    value: number;
+    flag: string;
+    symbol: string;
+}
 ```
 
-## Step 2: Start your Application
+- Constants which is required for the conversion of data which comes in an Array ( This data is created according to the interface mentioned above )
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
-
-### For Android
-
-```bash
-# using npm
-npm run android
-
-# OR using Yarn
-yarn android
+```
+export const currencyByRupee: Currency[] = [
+    {
+      name: 'DOLLAR',
+      value: 0.012271428,
+      flag: '🇺🇸',
+      symbol: '$',
+    },
+    {
+      name: 'EURO',
+      value: 0.01125809,
+      flag: '🇪🇺',
+      symbol: '€',
+    },
+  ];
 ```
 
-### For iOS
+- Button Creation for Currency convertion
 
-```bash
-# using npm
-npm run ios
+  - Declaraion of type for ( Currency Button )
 
-# OR using Yarn
-yarn ios
+  ```
+  type CurrencyButtonProps = PropsWithChildren<{
+    name:string;
+    flag:string;
+  }>
+  ```
+
+  - Defining a Button as the type of Currency Button declared above.
+
+  ```
+  const CurrencyButton = (props: CurrencyButtonProps):JSX.Element => {
+     return(
+        <View style={styles.buttomContainer}>
+              <Text style={styles.flag}>{props.flag}</Text>
+              <Text style={styles.country}>{props.name}</Text>
+        </View>
+     )
+  }
+  ```
+
+- importing currecy data from ( Constants )
+
+```
+import { currencyByRupee } from './constants'
 ```
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+- importing Button Component from ( components ) file
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+```
+import CurrencyButton from './components/CurrencyButton'
+```
 
-## Step 3: Modifying your App
+- Downloaded the snackbar libery and imported it for pop ups in app
 
-Now that you have successfully run the app, let's modify it.
+```
+npm i react-native-snackbar
+import Snackbar from 'react-native-snackbar'
+```
 
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
+- Created the State Variabel for input, result and target currency
 
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+```
+const [inputValue, setInputValue] = useState('')
+const [resultValue, setResultValue] = useState('')
+const [targetCurrency, setTargetCurrency] = useState('')
+```
 
-## Congratulations! :tada:
+- button press for target currency
 
-You've successfully run and modified your React Native App. :partying_face:
+  - If button is clicked without inputing the value and the logic for the currency convertion
+  - If the input is given in NaN format it also give a snackBar error
 
-### Now what?
+  ```
+  const buttonPressed = (targetCurrency: Currency) => {
+     if (!inputValue) {
+        return Snackbar.show({
+        text: 'Enter a value to convert',
+        backgroundColor:'#EA7773',
+        textColor: '#000000'
+        })
+     }
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
+     const inputAmount = parseFloat(inputValue)
+     if (!isNaN(inputAmount)) {
+        const convertedValue = inputAmount * targetCurrency.value
+        const result = `${targetCurrency.symbol} ${convertedValue.toFixed(2)}`
+        setResultValue(result)
+        setTargetCurrency(targetCurrency.name)
+     } else {
+        return Snackbar.show({
+        text: 'Not a valid number to convert',
+        backgroundColor:'#F4BE2C',
+        textColor: '#000000'
+        })
+     }
+  }
+  ```
 
-# Troubleshooting
+- Text input for inputing the amount in rupees
 
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+```
+<Text style={styles.rupee}>₹</Text>
+   <TextInput
+      maxLength={14}
+      value={inputValue}
+      onChangeText={setInputValue}
+      keyboardType='number-pad'
+      placeholder='Enter the amount in Rupees'
+   />
+```
 
-# Learn More
+- When the result is generated then this component is visible
 
-To learn more about React Native, take a look at the following resources:
+```
+{resultValue && (
+   <Text style={styles.resultTxt}>
+      {resultValue}
+   </Text>
+)}
+```
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
-# React-Native-Currency-Convertor
+- Flat List With Render Item
+
+```
+<FlatList
+   numColumns={1}
+   data={currencyByRupee}
+   keyExtractor={item => item.name}
+   renderItem={({item}) => (
+      <Pressable
+         style={[
+            styles.button,
+               targetCurrency === item.name && styles.selected
+            ]}
+         onPress={() => buttonPressed(item)}
+      >
+         <CurrencyButton {...item}/>
+      </Pressable>
+            )}
+          />
+```
